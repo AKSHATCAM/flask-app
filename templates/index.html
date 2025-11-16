@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-DJ System - MCP Vibe Meter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>AI-DJ System</h1>
+                <span class="subtitle">MCP Data Vibe Meter</span>
+            </div>
+            <div class="session-info">
+                <span id="session-id">Session: Loading...</span>
+                <span id="session-duration">Duration: 00:00:00</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Stats -->
+            <aside class="left-panel">
+                <div class="stats-card">
+                    <h3>Current Vibe</h3>
+                    <div class="vibe-meter">
+                        <div class="meter-circle" id="overall-vibe">
+                            <span class="meter-value">0%</span>
+                            <span class="meter-label">Overall</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <h3>Live Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Movement</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="movement-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-value" id="movement-value">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Audio</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="audio-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-value" id="audio-value">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Crowd Energy</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="energy-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-value" id="energy-value">0%</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel - Tracklist -->
+            <section class="center-panel">
+                <div class="tracklist-card">
+                    <h2>Tracklist</h2>
+                    <div class="tracklist" id="tracklist">
+                        <!-- Tracks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel - Graphs and Recommendations -->
+            <aside class="right-panel">
+                <!-- Vibe Graphs -->
+                <div class="graphs-card">
+                    <h3>Vibe Graphs</h3>
+                    <div class="chart-container">
+                        <canvas id="vibeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Claude Recommendations -->
+                <div class="recommendations-card">
+                    <h3>Claude AI Recommendations</h3>
+                    <div class="recommendations" id="recommendations">
+                        <!-- Recommendations will be populated by JavaScript -->
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <button class="refresh-btn" id="refresh-data">Refresh Data</button>
+            <span class="last-update">Last Update: <span id="last-update">Never</span></span>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
