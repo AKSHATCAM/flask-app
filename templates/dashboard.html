@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-DJ System - MCP Vibe Meter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Bar -->
+        <header class="header-bar">
+            <div class="brand">
+                <div class="logo-icon">DJ</div>
+                <div class="brand-text">
+                    <h1>AI-DJ System</h1>
+                    <span class="subtitle">MCP Data Vibe Meter</span>
+                </div>
+            </div>
+            <div class="connection-status">
+                <span class="status-dot" id="connection-dot"></span>
+                <span id="connection-text">Connecting...</span>
+            </div>
+            <div class="session-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Session</span>
+                    <span class="meta-value" id="session-id">---</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Duration</span>
+                    <span class="meta-value" id="session-duration">00:00:00</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Last Update</span>
+                    <span class="meta-value" id="last-update">Never</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Left Column - Vibe Meters -->
+            <section class="vibe-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Live Vibe Meters</h2>
+                        <span class="pulse-indicator"></span>
+                    </div>
+
+                    <!-- Main Vibe Gauge -->
+                    <div class="main-gauge">
+                        <div class="gauge-container">
+                            <svg class="gauge-svg" viewBox="0 0 200 120">
+                                <path class="gauge-bg" d="M20,100 A80,80 0 0,1 180,100"></path>
+                                <path class="gauge-fill" id="main-gauge-fill" d="M20,100 A80,80 0 0,1 180,100"></path>
+                            </svg>
+                            <div class="gauge-value">
+                                <span class="value-number" id="overall-vibe-value">0</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="gauge-label">Overall Vibe</div>
+                        </div>
+                        <div class="vibe-status" id="vibe-status">Initializing...</div>
+                    </div>
+
+                    <!-- Individual Metrics -->
+                    <div class="metric-bars">
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-icon">M</span>
+                                <span class="metric-name">Movement</span>
+                                <span class="metric-trend" id="movement-trend"></span>
+                            </div>
+                            <div class="metric-bar-container">
+                                <div class="metric-bar-bg">
+                                    <div class="metric-bar-fill movement" id="movement-bar"></div>
+                                </div>
+                                <span class="metric-value" id="movement-value">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-icon">A</span>
+                                <span class="metric-name">Audio Level</span>
+                                <span class="metric-trend" id="audio-trend"></span>
+                            </div>
+                            <div class="metric-bar-container">
+                                <div class="metric-bar-bg">
+                                    <div class="metric-bar-fill audio" id="audio-bar"></div>
+                                </div>
+                                <span class="metric-value" id="audio-value">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-icon">E</span>
+                                <span class="metric-name">Crowd Energy</span>
+                                <span class="metric-trend" id="energy-trend"></span>
+                            </div>
+                            <div class="metric-bar-container">
+                                <div class="metric-bar-bg">
+                                    <div class="metric-bar-fill energy" id="energy-bar"></div>
+                                </div>
+                                <span class="metric-value" id="energy-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-box">
+                            <span class="stat-number" id="peak-vibe">0%</span>
+                            <span class="stat-label">Peak Vibe</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number" id="tracks-played">0/0</span>
+                            <span class="stat-label">Tracks</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Column - Tracklist -->
+            <section class="tracklist-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Tracklist</h2>
+                        <span class="track-count" id="track-count">0 tracks</span>
+                    </div>
+                    <div class="tracklist-container" id="tracklist">
+                        <!-- Tracks will be populated by JavaScript -->
+                        <div class="loading-placeholder">Loading tracks...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column - Graphs & Recommendations -->
+            <section class="insights-section">
+                <!-- Vibe Graph -->
+                <div class="panel graph-panel">
+                    <div class="panel-header">
+                        <h2>Vibe Trends</h2>
+                        <div class="graph-controls">
+                            <button class="graph-btn active" data-metric="all">All</button>
+                            <button class="graph-btn" data-metric="overall">Overall</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="vibeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Claude Recommendations -->
+                <div class="panel recommendations-panel">
+                    <div class="panel-header">
+                        <h2>Claude AI Insights</h2>
+                        <span class="ai-badge">LIVE</span>
+                    </div>
+                    <div class="recommendations-list" id="recommendations">
+                        <div class="loading-placeholder">Waiting for Claude insights...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer Controls -->
+        <footer class="footer-controls">
+            <div class="control-group">
+                <button class="control-btn primary" id="refresh-btn">
+                    <span class="btn-icon">R</span>
+                    Refresh Data
+                </button>
+                <button class="control-btn" id="simulate-btn">
+                    <span class="btn-icon">S</span>
+                    Simulate Update
+                </button>
+            </div>
+            <div class="data-info">
+                <span>API: <code>/api/mcp-data</code></span>
+                <span>WebSocket: <span id="ws-status">Active</span></span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
